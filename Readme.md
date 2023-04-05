@@ -4,4 +4,5 @@ Adds a panel with days left to an exam and required study time, based on statist
 
 Click on the settings icon for a deck and select [Edit Deadline]
 
-![Showcase](explain.webm)
+https://user-images.githubusercontent.com/88032/230068728-56dfac7a-73a2-464c-a0ea-9d35ce8a9c96.mp4
+
