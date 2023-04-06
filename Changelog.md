@@ -1,6 +1,10 @@
  
 # Changelog
 
+## [0.0.3] - 2023-04-06
+
+- fix a bug when enabling deadlines on an empty deck
+
 ## [0.0.2] - 2023-04-05
 
 - fix current exam day

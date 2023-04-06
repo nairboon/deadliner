@@ -1,3 +1,4 @@
+import logging
 # import the main window object (mw) from aqt
 from aqt import mw
 # import the "show info" tool from utils.py
@@ -136,8 +137,7 @@ class DeadlinerDialog(QDialog):
         super().__init__(parent=mw)
 
         self.deadlineDeck = DeadlineDeck(deck_id)
-        #logging.info("yoyoy")
-        print("yoyoy")
+        
         v_container = QVBoxLayout()
         self.setLayout(v_container)
 
@@ -235,6 +235,13 @@ class DeadlineStats:
 
     def __init__(self, deck_id, name, deadline):
         print(deck_id, name, deadline)
+        
+        self.progress = 0
+        self.todoReps = 0
+        self.todoTime = 0
+        self.todoLearnN = 0
+        self.hasEstimate = False
+        
         self.name = name
         self.deck_id = deck_id
         self.deadline = datetime.strptime(deadline, "%d-%m-%Y").date()
@@ -246,33 +253,43 @@ class DeadlineStats:
 
         avg_reps, avg_sec = self.get_train_stats(deck_id)
 
-        #self.get_day_stats()
-
         stats = mw.col.stats()
 
         dl = stats._limit()
         print("deck limit", dl)
 
         mature, young, new, _ = self.count_cards()
-        print(f"mature: {mature}, young: {young}, new: {new}")
-        denom = mature + young + new
-        if denom > 0:
-            self.progress = mature / (mature + young + new)
+        
+        if mature is None:
+            print("No cards in deck?")
         else:
-            self.progress = 0
+        
+            print(f"mature: {mature}, young: {young}, new: {new}")
+            denom = mature + young + new
+            if denom > 0:
+                self.progress = mature / (mature + young + new)
+            else:
+                self.progress = 0
 
-        todo = young + new
-        total_reps = todo * avg_reps
-        total_time = total_reps * avg_sec
-        print(f"need for {todo} at least {int(total_reps)} reps (each with {avg_sec:3.2f}s which takes {total_time/60:.1f}min")
-
-        self.todoLearnN = todo
-        if self.daysLeft != 0:
-            self.todoReps = int(total_reps/self.daysLeft)
-            self.todoTime = total_time/self.daysLeft/60 #min
-        else:
-            self.todoReps = int(total_reps)
-            self.todoTime = total_time/60 #min
+            todo = young + new
+            
+            self.todoLearnN = todo
+            
+            if avg_reps is None:
+                print("No study statistics yet!")
+            else:
+                self.hasEstimate = True
+                total_reps = todo * avg_reps
+                total_time = total_reps * avg_sec
+                print(f"need for {todo} at least {int(total_reps)} reps (each with {avg_sec:3.2f}s which takes {total_time/60:.1f}min")
+    
+        
+                if self.daysLeft != 0:
+                    self.todoReps = int(total_reps/self.daysLeft)
+                    self.todoTime = total_time/self.daysLeft/60 #min
+                else:
+                    self.todoReps = int(total_reps)
+                    self.todoTime = total_time/60 #min
             
         print(f"Per day: reps: {self.todoReps} time: {self.todoTime} min")
 
@@ -310,6 +327,9 @@ class DeadlineStats:
         deckChildren = [
             childDeck[1] for childDeck in mw.col.decks.children(self.deck_id)
         ]
+        if len(deckChildren) == 0:
+            print(f"No deck children for deck: {self.deck_id}")
+            
         deckChildren.append(self.deck_id)
         deckIds = "(" + ", ".join(str(did) for did in deckChildren) + ")"
 
@@ -387,7 +407,18 @@ def display_footer(deck_browser, content):
             <tr>
             <td class="col1">{dl.name:s}</td>
             <td class="col2 days">{dl.daysLeft:d} days</td>
-            <td class="col2 days">{dl.todoLearnN:d} cards</td>
+            <td class="col2 days">{dl.todoLearnN:d} cards</td>"""
+            
+            if dl.hasEstimate:
+                res += f"""
+                <td class="col3 percent">{dl.todoReps} cards/day</td>
+                <td class="col3 percent">{dl.todoTime:.1f} min/day</td>"""
+            else:
+                res += f"""
+                <td class="col3 percent">No estimate yet</td>
+                <td class="col3 percent">No estimate yet</td>"""
+
+            res += f"""
             <td class="col3 percent">{dl.todoReps} cards/day</td>
             <td class="col3 percent">{dl.todoTime:.1f} min/day</td>
             <td class="col3 percent">{dl.progress:.1%}</td>
