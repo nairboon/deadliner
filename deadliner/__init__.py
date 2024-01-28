@@ -75,15 +75,20 @@ class DeadlineDb:
             print("Found db:", self.db)
             self.version = self.db["version"]
             self.deadlines = self.db["deadlines"]
+
+            # Validate deck_ids from the deadlines
+            keys = list(self.deadlines.keys())
+            for k in keys:
+                deck_id = int(k)
+                deck = mw.col.decks.get(deck_id, default=False)
+                if not deck:
+                    print(f"Deck with id: {deck_id} not found anymore!")
+                    del self.deadlines[k]
+
         else: # first time
             print("No db, creting one...")
             self.db = {"deadlines": {}, "version": 1}
             self.deadlines = {}
-
-
-#    @property
-#    def deadlines(self):
-#        return self.db["deadlines"]
 
     def __repr__(self):
         return f"DeadlineDb(deadlines={self.deadlines})\t{self.db}"

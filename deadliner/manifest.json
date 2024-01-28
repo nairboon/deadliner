@@ -1,5 +1,7 @@
 {
     "name": "Deadliner",
     "package": "deadliner",
-    "author": "nairboon"
+    "author": "nairboon",
+    "homepage": "https://github.com/nairboon/deadliner",
+    "version" : "0.0.3"
 }

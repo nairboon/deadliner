@@ -1,6 +1,10 @@
  
 # Changelog
 
+## [0.0.3] - 2024-01-28
+
+- fix a bug when deck with a deadline is deleted
+
 ## [0.0.3] - 2023-04-06
 
 - fix a bug when enabling deadlines on an empty deck
